@@ -3,7 +3,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Users, Star, TrendingUp } from 'lucide-react';
+import { Clock, Users, Star, TrendingUp, Download } from 'lucide-react';
 
 const resourceCategories = [
   {
@@ -136,9 +136,15 @@ export function Resources() {
                     1.2k+ helped
                   </div>
                 </div>
-                <Button className={`w-full bg-${category.color}-500 hover:bg-${category.color}-600 text-white`}>
-                  Explore Resources
-                </Button>
+                <div className="space-y-3">
+                  <Button className={`w-full bg-${category.color}-500 hover:bg-${category.color}-600 text-white`}>
+                    Explore Resources
+                  </Button>
+                  <Button variant="outline" className={`w-full border-${category.color}-300 text-${category.color}-600 hover:bg-${category.color}-50`}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Offline Pack
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}

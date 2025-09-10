@@ -389,13 +389,23 @@ export default function ResourcesPage() {
                           ))}
                         </div>
 
-                        <Button 
-                          className="w-full bg-sage-500 hover:bg-sage-600 text-white"
-                          size="sm"
-                        >
-                          <Play className="h-3 w-3 mr-2" />
-                          Access Resource
-                        </Button>
+                        <div className="space-y-2">
+                          <Button 
+                            className="w-full bg-sage-500 hover:bg-sage-600 text-white"
+                            size="sm"
+                          >
+                            <Play className="h-3 w-3 mr-2" />
+                            Access Resource
+                          </Button>
+                          <Button 
+                            variant="outline"
+                            className="w-full border-sage-300 text-sage-600 hover:bg-sage-50"
+                            size="sm"
+                          >
+                            <Download className="h-3 w-3 mr-2" />
+                            Download Offline
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   );
@@ -428,10 +438,16 @@ export default function ResourcesPage() {
                       </CardHeader>
                       <CardContent>
                         <p className="text-forest-500 text-sm mb-4">{resource.description}</p>
-                        <Button className="w-full bg-sage-500 hover:bg-sage-600 text-white">
-                          <Play className="h-4 w-4 mr-2" />
-                          Access Resource
-                        </Button>
+                        <div className="space-y-2">
+                          <Button className="w-full bg-sage-500 hover:bg-sage-600 text-white">
+                            <Play className="h-4 w-4 mr-2" />
+                            Access Resource
+                          </Button>
+                          <Button variant="outline" className="w-full border-sage-300 text-sage-600 hover:bg-sage-50">
+                            <Download className="h-4 w-4 mr-2" />
+                            Download Offline
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   );
@@ -466,10 +482,16 @@ export default function ResourcesPage() {
                     </CardHeader>
                     <CardContent>
                       <p className="text-forest-500 text-sm mb-4">{resource.description}</p>
-                      <Button className="w-full bg-sage-500 hover:bg-sage-600 text-white">
-                        <Play className="h-4 w-4 mr-2" />
-                        Watch Video
-                      </Button>
+                      <div className="space-y-2">
+                        <Button className="w-full bg-sage-500 hover:bg-sage-600 text-white">
+                          <Play className="h-4 w-4 mr-2" />
+                          Watch Video
+                        </Button>
+                        <Button variant="outline" className="w-full border-sage-300 text-sage-600 hover:bg-sage-50">
+                          <Download className="h-4 w-4 mr-2" />
+                          Download Video
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -503,10 +525,16 @@ export default function ResourcesPage() {
                     </CardHeader>
                     <CardContent>
                       <p className="text-forest-500 text-sm mb-4">{resource.description}</p>
-                      <Button className="w-full bg-sage-500 hover:bg-sage-600 text-white">
-                        <Play className="h-4 w-4 mr-2" />
-                        Listen Now
-                      </Button>
+                      <div className="space-y-2">
+                        <Button className="w-full bg-sage-500 hover:bg-sage-600 text-white">
+                          <Play className="h-4 w-4 mr-2" />
+                          Listen Now
+                        </Button>
+                        <Button variant="outline" className="w-full border-sage-300 text-sage-600 hover:bg-sage-50">
+                          <Download className="h-4 w-4 mr-2" />
+                          Download Audio
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}

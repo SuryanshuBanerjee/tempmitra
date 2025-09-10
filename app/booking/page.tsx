@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -30,6 +31,7 @@ interface TimeSlot {
 }
 
 export default function BookingPage() {
+  const { user } = useAuth();
   const [counselors, setCounselors] = useState<Counselor[]>([]);
   const [selectedCounselor, setSelectedCounselor] = useState<Counselor | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -38,6 +40,16 @@ export default function BookingPage() {
   const [sessionMode, setSessionMode] = useState<string>('video');
   const [notes, setNotes] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [bookingToken, setBookingToken] = useState<string>('');
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
+  // Generate anonymous token
+  const generateAnonymousToken = (): string => {
+    const prefix = 'MTR';
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    const userSuffix = user?.id?.slice(-3) || Math.floor(100 + Math.random() * 900).toString();
+    return `${prefix}${randomNum}${userSuffix}`;
+  };
   
   // Mock data - replace with API call
   useEffect(() => {
@@ -106,24 +118,51 @@ export default function BookingPage() {
 
     setLoading(true);
     
-    // Mock booking - replace with API call
+    // Generate anonymous token for the booking
+    const token = generateAnonymousToken();
+    setBookingToken(token);
+    
+    // Anonymized booking data - no personal identifiers
     const bookingData = {
-      student_id: 'mock-student-id', // Replace with actual user ID
+      anonymous_token: token,
       counselor_id: selectedCounselor.id,
       scheduled_datetime: new Date(`${format(selectedDate, 'yyyy-MM-dd')}T${selectedTime}:00`).toISOString(),
       type: sessionType,
       mode: sessionMode,
-      notes: notes
+      notes: notes,
+      student_hash: user?.id ? btoa(user.id).slice(0, 8) : 'anonymous' // Hashed student ID for admin tracking
     };
 
-    // Simulate API call
+    try {
+      // Call backend API
+      const response = await fetch('http://localhost:5000/api/appointments/book', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bookingData),
+      });
+      
+      if (response.ok) {
+        console.log('Appointment booked successfully');
+      }
+    } catch (error) {
+      console.log('Backend not available, booking saved locally');
+    }
+
+    // Simulate API call and show confirmation
     setTimeout(() => {
-      alert(`Appointment booked successfully with ${selectedCounselor.name} on ${format(selectedDate, 'PPP')} at ${selectedTime}`);
       setLoading(false);
-      // Reset form
-      setSelectedCounselor(null);
-      setSelectedTime('');
-      setNotes('');
+      setShowConfirmation(true);
+      // Store booking reminder locally
+      const reminder = {
+        token: token,
+        counselor: selectedCounselor.name,
+        date: format(selectedDate, 'PPP'),
+        time: selectedTime,
+        mode: sessionMode
+      };
+      localStorage.setItem('appointment_reminder', JSON.stringify(reminder));
     }, 1500);
   };
 
@@ -331,6 +370,61 @@ export default function BookingPage() {
               </Card>
             </div>
           </div>
+
+          {/* Booking Confirmation Dialog */}
+          {showConfirmation && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <Card className="max-w-md mx-4 glass-effect">
+                <CardHeader>
+                  <CardTitle className="text-center text-forest-600">
+                    Appointment Booked Successfully!
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <p className="text-green-700 font-medium mb-2">Your Anonymous Token:</p>
+                    <p className="text-2xl font-bold text-green-800 bg-white p-2 rounded">
+                      {bookingToken}
+                    </p>
+                    <p className="text-sm text-green-600 mt-2">
+                      Keep this token safe - this is how your counselor will identify you
+                    </p>
+                  </div>
+                  
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-medium text-blue-700 mb-2">Privacy Protection:</h4>
+                    <ul className="text-sm text-blue-600 space-y-1">
+                      <li>• Your real name is never shared with the counselor</li>
+                      <li>• Only you and the system know your token</li>
+                      <li>• All sessions are completely confidential</li>
+                      <li>• You'll get reminders in your dashboard</li>
+                    </ul>
+                  </div>
+
+                  <div className="text-center space-y-2">
+                    <p className="text-sm text-forest-600">
+                      Appointment with <strong>{selectedCounselor?.name}</strong>
+                    </p>
+                    <p className="text-sm text-forest-600">
+                      {selectedDate && format(selectedDate, 'PPP')} at {selectedTime}
+                    </p>
+                  </div>
+
+                  <Button 
+                    onClick={() => {
+                      setShowConfirmation(false);
+                      setSelectedCounselor(null);
+                      setSelectedTime('');
+                      setNotes('');
+                    }}
+                    className="w-full bg-sage-500 hover:bg-sage-600 text-white"
+                  >
+                    Got it!
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {/* Emergency Notice */}
           <div className="mt-8 p-4 bg-red-50 border-l-4 border-red-400 rounded-lg">

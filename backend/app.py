@@ -295,6 +295,154 @@ class MentalHealthChatBot:
 chatbot = MentalHealthChatBot()
 
 # Routes
+@app.route('/', methods=['GET'])
+def root():
+    return jsonify({
+        'message': 'MITRA Backend API Server',
+        'version': '1.0.0',
+        'status': 'running',
+        'endpoints': {
+            'health': '/api/health',
+            'auth': '/api/auth/login, /api/auth/register',
+            'chat': '/api/chat/send',
+            'counselors': '/api/counselors',
+            'appointments': '/api/appointments',
+            'resources': '/api/resources',
+            'forum': '/api/forum/posts',
+            'screening': '/api/screening/<type>',
+            'admin': '/api/admin/analytics'
+        }
+    })
+
+@app.route('/admin', methods=['GET'])
+def admin_dashboard():
+    # Get comprehensive admin data
+    total_users = User.query.count()
+    total_sessions = ChatSession.query.count()
+    crisis_sessions = ChatSession.query.filter_by(crisis_detected=True).count()
+    total_appointments = Appointment.query.count()
+    
+    # Recent activity
+    week_ago = datetime.utcnow() - timedelta(days=7)
+    new_users_week = User.query.filter(User.created_at >= week_ago).count()
+    
+    # Get all users with their details
+    users = User.query.all()
+    user_data = []
+    for user in users:
+        user_data.append({
+            'id': user.id,
+            'name': user.name,
+            'email': user.email,
+            'college': user.college,
+            'course': user.course,
+            'year': user.year,
+            'age': user.age,
+            'gender': user.gender,
+            'phq9_score': user.phq9_score,
+            'gad7_score': user.gad7_score,
+            'risk_level': user.risk_level,
+            'is_counselor': user.is_counselor,
+            'is_admin': user.is_admin,
+            'created_at': user.created_at.isoformat() if user.created_at else None,
+            'last_active': user.last_active.isoformat() if user.last_active else None
+        })
+    
+    # Get counselors
+    counselors = Counselor.query.all()
+    counselor_data = []
+    for c in counselors:
+        counselor_data.append({
+            'id': c.id,
+            'name': c.name,
+            'specialization': c.specialization,
+            'experience_years': c.experience_years,
+            'languages': json.loads(c.languages or '[]'),
+            'rating': c.rating,
+            'total_sessions': c.total_sessions,
+            'bio': c.bio,
+            'is_available': c.is_available
+        })
+    
+    # Get recent chat sessions with crisis detection
+    recent_sessions = ChatSession.query.order_by(ChatSession.started_at.desc()).limit(20).all()
+    session_data = []
+    for session in recent_sessions:
+        user = User.query.get(session.user_id) if session.user_id else None
+        session_data.append({
+            'id': session.id,
+            'user_name': user.name if user else 'Anonymous',
+            'user_email': user.email if user else 'Anonymous',
+            'started_at': session.started_at.isoformat(),
+            'status': session.status,
+            'crisis_detected': session.crisis_detected,
+            'sentiment_score': session.sentiment_score
+        })
+    
+    # Get crisis messages
+    crisis_messages = ChatMessage.query.filter(ChatMessage.crisis_keywords.isnot(None)).limit(50).all()
+    crisis_data = []
+    for msg in crisis_messages:
+        session = ChatSession.query.get(msg.session_id)
+        user = User.query.get(session.user_id) if session and session.user_id else None
+        crisis_data.append({
+            'message_id': msg.id,
+            'user_name': user.name if user else 'Anonymous',
+            'user_email': user.email if user else 'Anonymous',
+            'message': msg.message,
+            'crisis_keywords': json.loads(msg.crisis_keywords or '[]'),
+            'timestamp': msg.timestamp.isoformat(),
+            'sentiment': msg.sentiment
+        })
+    
+    # Get resources
+    resources = Resource.query.all()
+    resource_data = []
+    for r in resources:
+        resource_data.append({
+            'id': r.id,
+            'title': r.title,
+            'content_type': r.content_type,
+            'category': r.category,
+            'language': r.language,
+            'view_count': r.view_count,
+            'rating': r.rating,
+            'is_featured': r.is_featured
+        })
+    
+    # Get screening responses
+    screenings = ScreeningResponse.query.order_by(ScreeningResponse.completed_at.desc()).limit(50).all()
+    screening_data = []
+    for s in screenings:
+        user = User.query.get(s.user_id)
+        screening_data.append({
+            'id': s.id,
+            'user_name': user.name if user else 'Unknown',
+            'user_email': user.email if user else 'Unknown',
+            'screening_type': s.screening_type,
+            'total_score': s.total_score,
+            'risk_level': s.risk_level,
+            'completed_at': s.completed_at.isoformat()
+        })
+    
+    return jsonify({
+        'admin_dashboard': {
+            'overview': {
+                'total_users': total_users,
+                'total_sessions': total_sessions,
+                'crisis_sessions': crisis_sessions,
+                'total_appointments': total_appointments,
+                'new_users_week': new_users_week
+            },
+            'users': user_data,
+            'counselors': counselor_data,
+            'recent_sessions': session_data,
+            'crisis_alerts': crisis_data,
+            'resources': resource_data,
+            'recent_screenings': screening_data
+        }
+    })
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     return jsonify({'status': 'healthy', 'message': 'MITRA Backend is running'})

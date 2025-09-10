@@ -96,6 +96,30 @@ A comprehensive digital psychological intervention system for college students, 
 
    The backend will be available at [http://localhost:5000](http://localhost:5000)
 
+### Demo Credentials
+
+For testing the complete system:
+
+- **Admin Access**: 
+  - Email: `admin@mitra.ac.in`
+  - Password: `admin123`
+  - Access: Admin dashboard with analytics and crisis monitoring
+
+- **Student Access**: 
+  - Email: `student1@gmail.com`
+  - Password: `password123`
+  - Access: User dashboard with assessments and booking
+
+### Health Check
+
+Run the health check script to verify all services:
+
+```bash
+node health-check.js
+```
+
+This will verify that both frontend and backend services are running correctly.
+
 ## Project Structure
 
 ```

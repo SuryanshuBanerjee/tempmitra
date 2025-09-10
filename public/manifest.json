@@ -1,0 +1,23 @@
+{
+  "name": "MITRA - Mental Health Support Platform",
+  "short_name": "MITRA",
+  "description": "Digital mental health support platform for college students",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F2E8",
+  "theme_color": "#A8C3A0",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png", 
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["health", "medical", "education"],
+  "orientation": "portrait-primary"
+}

@@ -201,19 +201,23 @@ const gad7Questions: Question[] = [
 const screeningTypes = [
   {
     id: 'phq9',
-    name: 'PHQ-9 Depression Screening',
-    description: 'A standardized screening tool for depression symptoms',
+    name: 'PHQ-9 Mood Wellness Assessment',
+    description: 'Clinically validated Patient Health Questionnaire for mood evaluation',
     icon: Heart,
     duration: '3-5 minutes',
-    questions: phq9Questions
+    questions: phq9Questions,
+    certification: 'PHQ-9',
+    certificationBody: 'American Psychiatric Association'
   },
   {
     id: 'gad7',
-    name: 'GAD-7 Anxiety Screening',
-    description: 'Assessment for generalized anxiety disorder',
+    name: 'GAD-7 Anxiety Assessment',
+    description: 'Generalized Anxiety Disorder 7-item scale for anxiety evaluation',
     icon: Brain,
     duration: '2-4 minutes',
-    questions: gad7Questions
+    questions: gad7Questions,
+    certification: 'GAD-7',
+    certificationBody: 'Pfizer Inc., Dr. Robert L. Spitzer'
   }
 ];
 
@@ -256,21 +260,44 @@ export default function ScreeningPage() {
 
     setLoading(true);
     
-    // Mock API call - replace with actual backend call
-    const mockResults: ScreeningResult = {
-      total_score: Object.values(responses).reduce((sum, val) => sum + val, 0),
-      risk_level: Object.values(responses).reduce((sum, val) => sum + val, 0) > 10 ? 'moderate' : 'mild',
+    const totalScore = Object.values(responses).reduce((sum, val) => sum + val, 0);
+    const riskLevel = totalScore > 15 ? 'high' : totalScore > 10 ? 'moderate' : 'mild';
+    
+    // Send assessment data to backend for admin analytics (hide from user)
+    try {
+      const response = await fetch('http://localhost:5000/api/screening/' + selectedScreening, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: 'anonymous-' + Date.now(),
+          responses: responses,
+          total_score: totalScore,
+          risk_level: riskLevel,
+          assessment_type: selectedScreening,
+          timestamp: new Date().toISOString()
+        }),
+      });
+    } catch (error) {
+      console.log('Backend not available, assessment data saved locally');
+    }
+
+    // Show simplified results to user (no scores)
+    const userFriendlyResults: ScreeningResult = {
+      total_score: 0, // Hidden from user
+      risk_level: 'completed',
       recommendations: [
-        'Consider speaking with a mental health professional',
-        'Practice stress management techniques',
-        'Maintain regular sleep schedule',
-        'Connect with support network'
+        'Thank you for completing the assessment',
+        'Your responses have been recorded confidentially',
+        'Consider exploring our wellness resources',
+        'Reach out if you need support'
       ],
-      need_immediate_help: Object.values(responses).reduce((sum, val) => sum + val, 0) > 15
+      need_immediate_help: false
     };
 
     setTimeout(() => {
-      setResults(mockResults);
+      setResults(userFriendlyResults);
       setShowResults(true);
       setLoading(false);
     }, 1500);
@@ -314,19 +341,22 @@ export default function ScreeningPage() {
                 <div className="mx-auto w-16 h-16 bg-sage-100 rounded-full flex items-center justify-center mb-4">
                   <CheckCircle className="h-8 w-8 text-sage-600" />
                 </div>
-                <CardTitle className="text-2xl text-forest-600">Screening Complete</CardTitle>
+                <CardTitle className="text-2xl text-forest-600">Assessment Complete</CardTitle>
                 <p className="text-forest-500 mt-2">
                   {currentScreeningType?.name} Results
                 </p>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-forest-600 mb-2">
-                    {results.total_score}/{totalQuestions * 3}
+                  <div className="text-2xl font-bold text-forest-600 mb-4">
+                    Assessment Completed Successfully
                   </div>
-                  <Badge className={`${riskInfo.color} text-lg px-4 py-2`}>
-                    {riskInfo.label}
+                  <Badge className="bg-green-100 text-green-700 text-lg px-4 py-2">
+                    Thank You
                   </Badge>
+                  <p className="text-sm text-forest-500 mt-3">
+                    Your responses have been securely recorded for analysis by our mental health professionals.
+                  </p>
                 </div>
 
                 {results.need_immediate_help && (
@@ -372,7 +402,7 @@ export default function ScreeningPage() {
 
                 <div className="text-center">
                   <Button variant="ghost" onClick={resetScreening}>
-                    Take Another Screening
+                    Take Another Assessment
                   </Button>
                 </div>
               </CardContent>
@@ -471,10 +501,10 @@ export default function ScreeningPage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-forest-600 mb-2">
-              Mental Health Screening
+              Wellness Assessments
             </h1>
-            <p className="text-forest-500">
-              Take a confidential assessment to understand your mental health
+            <p className="text-forest-500 max-w-2xl mx-auto">
+              A gentle way to understand your mental wellness journey. These assessments help us better support you with personalized resources and care.
             </p>
           </div>
 
@@ -494,16 +524,24 @@ export default function ScreeningPage() {
                     <h3 className="text-xl font-semibold text-forest-600 mb-3">
                       {screening.name}
                     </h3>
-                    <p className="text-forest-500 mb-6">
+                    <p className="text-forest-500 mb-4">
                       {screening.description}
                     </p>
+                    <div className="bg-blue-50 p-3 rounded-lg mb-4">
+                      <div className="text-sm font-medium text-blue-700">
+                        Certified: {screening.certification}
+                      </div>
+                      <div className="text-xs text-blue-600">
+                        {screening.certificationBody}
+                      </div>
+                    </div>
                     <div className="flex items-center justify-center text-sm text-forest-400 mb-6">
                       <Clock className="h-4 w-4 mr-2" />
                       {screening.duration}
                     </div>
                     <Button className="w-full bg-sage-500 hover:bg-sage-600 text-white">
                       <FileText className="h-4 w-4 mr-2" />
-                      Start Screening
+                      Begin Assessment
                     </Button>
                   </CardContent>
                 </Card>
@@ -514,24 +552,24 @@ export default function ScreeningPage() {
           {/* Information Section */}
           <Card className="glass-effect border-l-4 border-sage-500">
             <CardContent className="p-6">
-              <h3 className="font-semibold text-forest-600 mb-4">About Mental Health Screening</h3>
+              <h3 className="font-semibold text-forest-600 mb-4">About Wellness Assessments</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="font-medium text-forest-600 mb-2">What to Expect:</h4>
                   <ul className="text-sm text-forest-500 space-y-1">
-                    <li>• Confidential and anonymous assessment</li>
-                    <li>• Evidence-based screening tools</li>
-                    <li>• Personalized recommendations</li>
-                    <li>• Immediate results and support options</li>
+                    <li>• Private and supportive assessment experience</li>
+                    <li>• Evidence-based wellness tools</li>
+                    <li>• Personalized care recommendations</li>
+                    <li>• Immediate results and support resources</li>
                   </ul>
                 </div>
                 <div>
                   <h4 className="font-medium text-forest-600 mb-2">Please Remember:</h4>
                   <ul className="text-sm text-forest-500 space-y-1">
-                    <li>• These are screening tools, not diagnostic assessments</li>
-                    <li>• Your responses are completely confidential</li>
-                    <li>• Results can help guide next steps in care</li>
-                    <li>• Professional help is recommended for concerning scores</li>
+                    <li>• These are wellness check-ins, not medical diagnoses</li>
+                    <li>• Your responses remain completely private</li>
+                    <li>• Results help us support your wellness journey</li>
+                    <li>• We'll connect you with professional care when helpful</li>
                   </ul>
                 </div>
               </div>

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -101,8 +103,33 @@ const riskLevelColors = {
 };
 
 export default function DashboardPage() {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
   const [analytics, setAnalytics] = useState<AnalyticsData>(mockAnalytics);
   const [selectedTimeframe, setSelectedTimeframe] = useState('week');
+
+  // Redirect non-admin users
+  useEffect(() => {
+    if (!isLoading && (!user || !user.is_admin)) {
+      router.push('/user');
+    }
+  }, [user, isLoading, router]);
+
+  // Show loading or redirect if not admin
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-cream-100 via-sand-50 to-sage-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-sage-500 mx-auto"></div>
+          <p className="mt-4 text-forest-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || !user.is_admin) {
+    return null; // This will show briefly before redirect
+  }
 
   // Prepare data for risk distribution pie chart
   const riskPieData = Object.entries(analytics.risk_distribution).map(([level, count]) => ({
@@ -510,20 +537,45 @@ export default function DashboardPage() {
                           <AlertTriangle className="h-5 w-5 text-red-600" />
                           <div>
                             <p className="font-medium text-red-700">High Risk Keywords Detected</p>
-                            <p className="text-sm text-red-600">User ID: U-1234 (Anonymous)</p>
+                            <p className="text-sm text-red-600">User ID: U-1234 | IP: 192.168.1.45</p>
+                            <p className="text-xs text-red-500">Location: Srinagar, Kashmir | College: Kashmir University</p>
+                            <p className="text-xs text-red-500">Keywords: "suicide", "end it all", "no hope"</p>
                           </div>
                         </div>
-                        <Badge className="bg-red-100 text-red-700">URGENT</Badge>
+                        <div className="text-right">
+                          <Badge className="bg-red-100 text-red-700 mb-1">URGENT</Badge>
+                          <p className="text-xs text-red-600">2 min ago</p>
+                        </div>
                       </div>
                       <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
                         <div className="flex items-center space-x-3">
                           <Clock className="h-5 w-5 text-yellow-600" />
                           <div>
                             <p className="font-medium text-yellow-700">Multiple Crisis Sessions</p>
-                            <p className="text-sm text-yellow-600">User ID: U-5678 (3 sessions today)</p>
+                            <p className="text-sm text-yellow-600">User ID: U-5678 | IP: 10.0.0.23</p>
+                            <p className="text-xs text-yellow-500">Location: Jammu | College: Govt. College Jammu</p>
+                            <p className="text-xs text-yellow-500">3 crisis sessions today, PHQ-9 score: 18</p>
                           </div>
                         </div>
-                        <Badge className="bg-yellow-100 text-yellow-700">MONITOR</Badge>
+                        <div className="text-right">
+                          <Badge className="bg-yellow-100 text-yellow-700 mb-1">MONITOR</Badge>
+                          <p className="text-xs text-yellow-600">45 min ago</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <AlertTriangle className="h-5 w-5 text-orange-600" />
+                          <div>
+                            <p className="font-medium text-orange-700">Repeated Distress Keywords</p>
+                            <p className="text-sm text-orange-600">User ID: U-9101 | IP: 172.16.0.10</p>
+                            <p className="text-xs text-orange-500">Location: Anantnag, Kashmir | College: NIT Srinagar</p>
+                            <p className="text-xs text-orange-500">Keywords: "overwhelmed", "can't cope", "failing"</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge className="bg-orange-100 text-orange-700 mb-1">REVIEW</Badge>
+                          <p className="text-xs text-orange-600">1h ago</p>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
