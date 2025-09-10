@@ -1,6 +1,6 @@
 # MITRA - J&K Mental Health Support Platform
 
-A comprehensive digital psychological intervention system for college students, specifically designed for the Jammu & Kashmir region. MITRA provides AI-guided support, counselor booking, resource hub, peer community, and crisis intervention in a culturally sensitive, multilingual environment.
+THIS IS ONLY THE FIRST DEMO PROTOTYPE BUILT IN 24 HOURS. A comprehensive digital psychological intervention system for college students, specifically designed for the Jammu & Kashmir region. MITRA provides AI-guided support, counselor booking, resource hub, peer community, and crisis intervention in a culturally sensitive, multilingual environment.
 
 ## Features
 
