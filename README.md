@@ -251,3 +251,164 @@ For technical support or questions about the platform, please refer to the docum
 ---
 
 **MITRA** - *Supporting student mental health in Jammu & Kashmir through technology and community.*
+
+
+1) High-level, ELI5 overview — “what is this thing?”
+
+Think of MITRA as two teams that talk to each other:
+
+Frontend (Next.js + TypeScript + Tailwind) — this is the app the user sees: pages, buttons, forms, dashboards, chat window, booking UI.
+Analogy: the shopfront and cashier where users click and type.
+
+Backend (Flask + SQLAlchemy + SQLite) — this stores data, runs logic, and answers requests from the frontend.
+Analogy: the store manager and storeroom who keep the products, handle bookings, run the chatbot, and check the rules.
+
+They talk over HTTP (API endpoints). Frontend calls endpoints like /api/auth/login, /api/counselors, /api/appointments/book, /api/chat/send to do stuff.
+
+2) Big picture data & flows (simple step-by-step)
+A — User opens the app
+
+Browser loads Next.js pages.
+
+Pages call a small client API helper (likely lib/api.ts) to talk to Flask endpoints.
+
+B — Authentication
+
+User submits email/password to POST /api/auth/login.
+
+Backend checks credentials (SQLAlchemy -> users table), issues a session token or JWT, and returns user details.
+
+Frontend stores token (in memory or localStorage) and includes it in future requests (Authorization header).
+
+C — Chat / AI-guided first-aid
+
+User types a message and clicks send.
+
+Frontend sends POST /api/chat/send with text + user id/token.
+
+Backend receives message, runs some logic: either a small rules-based reply, calls an AI model (or mock), does crisis detection (keyword match), and returns a chat response.
+
+If crisis detected, backend escalates (flag in DB / notify admin).
+
+D — Booking a counselor
+
+Frontend shows list of counselors (GET /api/counselors).
+
+When user books, frontend POST /api/appointments/book with user id, counselor id, timeslot.
+
+Backend creates appointment entry in DB and returns confirmation.
+
+E — Screening (PHQ-9, GAD-7)
+
+Frontend shows a form of questions.
+
+When submitted, frontend POST /api/screening/:type with answers.
+
+Backend computes a score, saves it, and returns recommended action.
+
+F — Community / Forum
+
+Frontend GET /api/forum/posts and POST /api/forum/posts for reading/creating posts (anonymous option supported).
+
+Backend stores posts, enforces moderation rules.
+
+G — Admin dashboard
+
+Admin logs in (admin credentials).
+
+Admin pages GET /api/admin/analytics, see metrics, crisis alerts, user distribution, etc.
+
+3) Core files you should open (and what to teach from each)
+
+These are the files/folders listed in the README. Open each and use the surrounding code to explain the concept below.
+
+Frontend (Next.js app)
+
+app/ — the top-level app pages (booking, chat, community, dashboard, resources, screening).
+
+Teach: Next.js App Router basics; how a page maps to a URL.
+
+components/ — reusable UI (navigation, layout, forms, cards).
+
+Teach: React components, props, state, composition.
+
+lib/api.ts — the client-side wrapper for making API calls.
+
+Teach: how to centralize fetch logic, set Authorization header, handle errors.
+
+contexts/ — likely React Context providers (auth, theme).
+
+Teach: global state management (user auth, tokens).
+
+hooks/ — custom hooks for data fetching.
+
+Teach: useEffect, useState, and abstracting logic into hooks.
+
+Backend (Flask)
+
+backend/app.py — main Flask app and API endpoints.
+
+Teach: route definitions, request handling, returning JSON responses.
+
+backend/requirements.txt — packages used (Flask, SQLAlchemy, Flask-CORS).
+
+Teach: dependencies & why each is needed.
+
+Database models file(s) — (likely in backend folder or models.py).
+
+Teach: SQLAlchemy models -> how Python classes map to DB tables.
+
+Any utils files — helpers for screening logic or crisis detection.
+
+Teach: where business logic lives (scoring algorithms, keyword lists).
+
+Other
+
+lib/utils.ts — helper functions used by frontend.
+
+Teach: formatting, client-side validations.
+
+If you want, paste the contents of these specific files and I’ll go line-by-line with ELI5 explanations.
+
+4) ELI5 for the most important technical pieces
+What is a Next.js page? (ELI5)
+
+“A page file is like a recipe card. The file says: when someone goes to /booking, show this layout, fetch these counselor details, and put the booking form here.”
+
+Key points to teach:
+
+Pages run in the browser (React); they can also have server components if using Next.js app router.
+
+Components are small building blocks like LEGO pieces — combine them to make a page.
+
+What is Flask app.py? (ELI5)
+
+“app.py is the manager who listens at the door (port 5000). When the frontend knocks with a request (GET, POST), the manager reads it, asks the storage (DB) for info or saves something, and sends back a reply in JSON.”
+
+Key points to teach:
+
+@app.route('/api/whatever', methods=['POST']) defines an endpoint.
+
+Use request.json to read incoming JSON; use jsonify() or return {...}, status to reply.
+
+Security: check Authorization header for protected routes.
+
+What is SQLAlchemy? (ELI5)
+
+“SQLAlchemy lets you treat database tables like Python objects. Instead of writing SQL strings, you say User(name='A') and SQLAlchemy turns it into a row in the users table.”
+
+Key points:
+
+Define classes: class User(Base): id = Column(Integer, primary_key=True) etc.
+
+Querying: session.query(User).filter_by(email=...) returns Python objects.
+
+How chat/crisis detection probably works (ELI5)
+
+Chat message arrives.
+
+The backend scans for urgent keywords (e.g., “suicide”, “hurt myself”) — think of it like a red-flag detector.
+
+If red-flag found → mark message, escalate, return urgent resources and maybe route to a counselor.
+
+Otherwise → reply via canned answers or call an AI model.
