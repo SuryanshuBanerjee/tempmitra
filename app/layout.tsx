@@ -5,6 +5,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { FloatingParticles } from '@/components/ui/floating-particles';
 import { Toaster } from 'sonner';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -38,6 +39,7 @@ export default function RootLayout({
       </head>
       <body className={`${poppins.className} min-h-screen antialiased`}>
         <ErrorBoundary>
+          <FloatingParticles />
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -46,7 +48,9 @@ export default function RootLayout({
           >
             <LanguageProvider>
               <AuthProvider>
-                {children}
+                <div className="relative z-10">
+                  {children}
+                </div>
                 <Toaster richColors position="top-right" />
               </AuthProvider>
             </LanguageProvider>

@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Send, Bot, User, Heart, AlertCircle, Phone, MessageSquare } from 'lucide-react';
 import { Navigation } from '@/components/layout/Navigation';
 import Link from 'next/link';
+import Script from 'next/script';
 
 interface Message {
   id: string;
@@ -302,6 +303,12 @@ export default function ChatPage() {
     <div className="min-h-screen bg-gradient-to-br from-cream-100 via-sand-50 to-sage-50">
       <Navigation />
       
+      {/* Google Dialogflow Script */}
+      <Script 
+        src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"
+        strategy="afterInteractive"
+      />
+      
       <div className="pt-20 px-4 sm:px-6 lg:px-8 pb-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
@@ -457,6 +464,79 @@ export default function ChatPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Google Dialogflow Widget - Advanced Mode Only */}
+          {useAdvancedMode && (
+            <Card className="glass-effect gentle-shadow mt-6">
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
+                <CardTitle className="flex items-center">
+                  <Bot className="h-6 w-6 mr-2" />
+                  {language === 'hi' ? 'Google AI सहायक (कार्य प्रगति पर)' : 'Google AI Assistant (Work in Progress)'}
+                  <Badge variant="secondary" className="ml-auto bg-white/20 text-white">
+                    {language === 'hi' ? 'प्रयोगात्मक' : 'Experimental'}
+                  </Badge>
+                </CardTitle>
+                <p className="text-sm text-white/80 mt-1">
+                  {language === 'hi' 
+                    ? 'यह Google Dialogflow द्वारा संचालित एक प्रयोगात्मक AI सहायक है। यदि यह लोड नहीं होता है, तो ऊपर के MITRA चैट का उपयोग करें।'
+                    : 'This is an experimental AI assistant powered by Google Dialogflow. If it doesn\'t load, please use the MITRA chat above.'
+                  }
+                </p>
+              </CardHeader>
+              
+              <CardContent className="p-6">
+                <div className="text-center mb-4">
+                  <p className="text-forest-600 mb-2">
+                    {language === 'hi' 
+                      ? '🚧 विकास में: Google AI एकीकरण'
+                      : '🚧 In Development: Google AI Integration'
+                    }
+                  </p>
+                  <p className="text-sm text-forest-500">
+                    {language === 'hi'
+                      ? 'यह फीचर अभी भी विकसित हो रहा है। बेहतर अनुभव के लिए ऊपर वाले MITRA चैट का उपयोग करें।'
+                      : 'This feature is still being developed. For a better experience, please use the MITRA chat above.'
+                    }
+                  </p>
+                </div>
+                
+                {/* Dialogflow Messenger Container */}
+                <div className="min-h-[300px] flex items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                  <div className="text-center">
+                    {/* Dialogflow will render here when ready */}
+                    <df-messenger
+                      intent="WELCOME"
+                      chat-title={language === 'hi' ? 'MITRA मानसिक स्वास्थ्य सहायता' : 'MITRA Mental Health Support'}
+                      agent-id="a4324459-01e5-49f4-916a-3b6615bf1c72"
+                      language-code={language === 'hi' ? 'hi' : 'en'}
+                      className="w-full h-full"
+                    />
+                    <div className="mt-4 text-gray-500">
+                      <Bot className="h-12 w-12 mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm">
+                        {language === 'hi' ? 'Google AI लोड हो रहा है...' : 'Loading Google AI...'}
+                      </p>
+                      <p className="text-xs mt-1">
+                        {language === 'hi' 
+                          ? 'यदि यह लोड नहीं होता है, तो यह अभी भी विकास में है।'
+                          : 'If this doesn\'t load, it\'s still in development.'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                  <p className="text-xs text-blue-600 text-center">
+                    {language === 'hi'
+                      ? '💡 सुझाव: अभी के लिए ऊपर वाले MITRA चैट का उपयोग करें जो पूरी तरह कार्यात्मक है और बेहतर अनुभव प्रदान करता है।'
+                      : '💡 Tip: For now, use the MITRA chat above which is fully functional and provides better experience.'
+                    }
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Additional Resources */}
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">

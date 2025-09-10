@@ -42,14 +42,14 @@ export function Navigation() {
     <nav className="fixed top-0 left-0 right-0 z-50 glass-effect border-b border-sage-200/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="flex items-center flex-shrink-0">
-            <Link href="/" className="flex items-center space-x-2">
+          <div className="flex items-center flex-shrink-0 mr-8">
+            <Link href="/" className="flex items-center space-x-3">
               <img 
                 src="/Mitra Logo.png" 
                 alt="MITRA Logo" 
-                className="w-10 h-10 object-contain"
+                className="w-14 h-14 object-contain"
               />
-              <span className="font-semibold text-lg text-forest-600 hidden sm:block">MITRA</span>
+              <span className="font-semibold text-xl text-forest-600">MITRA</span>
             </Link>
           </div>
 
